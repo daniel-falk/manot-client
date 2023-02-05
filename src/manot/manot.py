@@ -82,8 +82,8 @@ class manotAI:
 
         try:
             response = requests.get(url=url)
-        except Exception:
-            log.error("There is problem with request.")
+        except requests.exceptions.RequestException as e:
+            log.error("There is problem with request: %s" % str(e))
             return False
 
         if response.status_code != 200:

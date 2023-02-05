@@ -215,16 +215,18 @@ class manotAI:
 
     def __check_progress(self, process_method, id):
         progress = 0
-        progress_bar = tqdm(desc="Progress", total=100)
-        while progress < 100:
-            result = process_method(id)
-            if result and result["status"] != "failure":
-                progress_bar.update(result['progress'] - progress)
-                progress = result['progress']
-                if result["status"] == "finished":
-                    progress_bar.close()
-                    return result
-            else:
-                progress_bar.close()
-                return False
-            time.sleep(2)
+        with tqdm(desc="Progress", total=100) as progress_bar:
+            while True:
+                result = process_method(id)
+                if result and result["status"] != "failure":
+                    progress_bar.update(result["progress"] - progress)
+                    progress = result['progress']
+                    if result["status"] == "finished":
+                        return result
+                elif result:
+                    log.error("Got status %s" % result["status"])
+                    return False
+                else:
+                    log.error("API call failed")
+                    # Try again...
+                time.sleep(2)
